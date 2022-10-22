@@ -16,7 +16,6 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
     implementation group: 'io.netty', name: 'netty-all', version: '4.1.84.Final'
-    implementation group: 'org.json', name: 'json', version: '20220924'
 }
 
 publishing {
