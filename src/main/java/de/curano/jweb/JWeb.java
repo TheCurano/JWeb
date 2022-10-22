@@ -4,6 +4,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import javax.net.ssl.SSLException;
@@ -26,7 +27,17 @@ public class JWeb {
     private EventLoopGroup httpsAcceptorGroup = null;
     private EventLoopGroup httpsClientGroup = null;
     private Channel httpsChannel = null;
-    protected String pageNotFound = "404 Not Found";
+    protected HttpHandler pageNotFound = new HttpHandler() {
+        @Override
+        public void onRequest(HttpRequest request) {
+            request.setResponse(HttpResponseStatus.NOT_FOUND, "404 Page not found");
+        }
+
+        @Override
+        public void onException(Throwable cause) {
+
+        }
+    };
 
     protected ArrayList<HttpHandler> handlers = new ArrayList<>();
 
@@ -132,11 +143,11 @@ public class JWeb {
         return (List<HttpHandler>) this.handlers.clone();
     }
 
-    public void setPageNotFound(String pageNotFound) {
-        this.pageNotFound = pageNotFound;
+    public void setPageNotFound(HttpHandler handler) {
+        this.pageNotFound = handler;
     }
 
-    public String getPageNotFound() {
+    public HttpHandler getPageNotFound() {
         return this.pageNotFound;
     }
 

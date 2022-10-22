@@ -60,9 +60,17 @@ public class RawHttpHandler extends SimpleChannelInboundHandler<HttpObject> {
                 return;
             }
 
-            FullHttpResponse response = new DefaultFullHttpResponse(req.protocolVersion(),
-                    request.getStatus(),
-                    Unpooled.wrappedBuffer((request.getContent() == null ? jWeb.getPageNotFound() : request.getContent()).getBytes(StandardCharsets.UTF_8)));
+            FullHttpResponse response = null;
+            if (request.getContent() != null) {
+                response = new DefaultFullHttpResponse(req.protocolVersion(),
+                        request.getStatus(),
+                        Unpooled.wrappedBuffer(request.getContent().getBytes(StandardCharsets.UTF_8)));
+            } else {
+                jWeb.getPageNotFound().onRequest(request);
+                response = new DefaultFullHttpResponse(req.protocolVersion(),
+                        request.getStatus(),
+                        Unpooled.wrappedBuffer(request.getContent().getBytes(StandardCharsets.UTF_8)));
+            }
 
             for (var header : request.getHeaders()) {
                 response.headers().set(header.getKey(), header.getValue());
