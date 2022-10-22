@@ -1,6 +1,6 @@
 package de.curano.jweb;
 
-interface HttpHandler {
+public interface HttpHandler {
 
     public void onRequest(HttpRequest request);
 
