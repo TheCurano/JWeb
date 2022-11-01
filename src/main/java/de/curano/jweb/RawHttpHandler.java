@@ -34,7 +34,7 @@ public class RawHttpHandler extends SimpleChannelInboundHandler<HttpObject> {
     @Override
     public void channelRead0(ChannelHandlerContext ctx, HttpObject msg) {
         if (msg instanceof HttpRequest req) {
-            boolean keepAlive = HttpUtil.isKeepAlive(req);
+            // boolean keepAlive = HttpUtil.isKeepAlive(req);
             String url = req.uri().split("\\?")[0];
             HashMap<String, String> vars = new HashMap<>();
             if (req.uri().contains("?") && req.uri().contains("=")) {
@@ -76,18 +76,20 @@ public class RawHttpHandler extends SimpleChannelInboundHandler<HttpObject> {
                 response.headers().set(header.getKey(), header.getValue());
             }
 
-            if (keepAlive) {
+            // ToDo add "Keep Alive" for any reason
+
+            /*if (keepAlive) {
                 if (!req.protocolVersion().isKeepAliveDefault()) {
                     response.headers().set(CONNECTION, KEEP_ALIVE);
                 }
-            } else {
+            } else {*/
                 response.headers().set(CONNECTION, CLOSE);
-            }
+            // }
 
             ChannelFuture future = ctx.write(response);
-            if (!keepAlive) {
+            // if (!keepAlive) {
                 future.addListener(ChannelFutureListener.CLOSE);
-            }
+            // }
         }
     }
     @Override
