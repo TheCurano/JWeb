@@ -57,6 +57,7 @@ public class JHttpResponse implements HttpServletResponse {
         contentSet = true;
     }
 
+    @Deprecated
     @Override
     public void addCookie(jakarta.servlet.http.Cookie cookie) {
         DefaultCookie cookie1 = new DefaultCookie(cookie.getName(), cookie.getValue());
@@ -71,7 +72,7 @@ public class JHttpResponse implements HttpServletResponse {
         this.originalResponse.headers().set("Set-Cookie", cookieHeader);
     }
 
-    public void addCookie(Cookie cookie) {
+    public void setCookie(Cookie cookie) {
         ArrayList<String> cookieHeader = new ArrayList<>(this.originalResponse.headers().getAll("Set-Cookie"));
         cookieHeader.add(ServerCookieEncoder.STRICT.encode(cookie));
         this.originalResponse.headers().set("Set-Cookie", cookieHeader);

@@ -97,6 +97,9 @@ public class JHttpRequest implements HttpServletRequest {
         return null;
     }
 
+    /**
+     * Use getNettyCookies() instead
+     */
     @Deprecated
     public jakarta.servlet.http.Cookie[] getCookies() {
         String cookieString = this.originalRequest.headers().get(HttpHeaderNames.COOKIE);
