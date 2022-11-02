@@ -1,7 +1,8 @@
 package de.curano.test;
 
 import de.curano.jweb.HttpHandler;
-import de.curano.jweb.HttpRequest;
+import de.curano.jweb.JHttpRequest;
+import de.curano.jweb.JHttpResponse;
 import de.curano.jweb.JWeb;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
@@ -17,8 +18,8 @@ public class TestApp {
         // Adding PageNotFound Handler (you don't have to do this)
         jWeb.setPageNotFound(new HttpHandler() {
             @Override
-            public void onRequest(HttpRequest request) {
-                request.setResponse(HttpResponseStatus.NOT_FOUND, "Page not found");
+            public void onRequest(JHttpRequest request, JHttpResponse response) {
+                response.setResponse(HttpResponseStatus.NOT_FOUND, "Page not found");
             }
 
             @Override
@@ -30,16 +31,16 @@ public class TestApp {
         // Adding a new Handler
         jWeb.addHandler(new HttpHandler() {
             @Override
-            public void onRequest(HttpRequest request) {
+            public void onRequest(JHttpRequest request, JHttpResponse response) {
                 // Setting the Response
-                if (request.path().equals("/")) {
-                    request.setResponse(HttpResponseStatus.ACCEPTED, "Hello World!");
+                if (request.getContextPath().equals("/")) {
+                    response.setResponse(HttpResponseStatus.ACCEPTED, "Hello World!");
                 }
             }
 
             @Override
             public void onException(Throwable cause) {
-
+                cause.printStackTrace();
             }
         });
     }

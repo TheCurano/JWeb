@@ -29,8 +29,8 @@ public class JWeb {
     private Channel httpsChannel = null;
     protected HttpHandler pageNotFound = new HttpHandler() {
         @Override
-        public void onRequest(HttpRequest request) {
-            request.setResponse(HttpResponseStatus.NOT_FOUND, "404 Page not found");
+        public void onRequest(JHttpRequest request, JHttpResponse response) {
+            response.setResponse(HttpResponseStatus.NOT_FOUND, "404 Page not found");
         }
 
         @Override

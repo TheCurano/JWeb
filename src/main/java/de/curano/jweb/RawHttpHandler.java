@@ -12,10 +12,6 @@ import io.netty.handler.ssl.SslContext;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import static io.netty.handler.codec.http.HttpHeaderNames.CONNECTION;
-import static io.netty.handler.codec.http.HttpHeaderValues.CLOSE;
-import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
-
 public class RawHttpHandler extends SimpleChannelInboundHandler<HttpObject> {
 
     private JWeb jWeb;
@@ -50,29 +46,20 @@ public class RawHttpHandler extends SimpleChannelInboundHandler<HttpObject> {
                 }
             }
 
-            var request = new de.curano.jweb.HttpRequest(url, ctx, msg, sslCtx != null, vars, req.headers());
+            var request = new JHttpRequest(req, url, ctx, vars);
+            var response = new JHttpResponse(new DefaultFullHttpResponse(req.protocolVersion(), HttpResponseStatus.NOT_FOUND, Unpooled.copiedBuffer("404 Page not found", StandardCharsets.UTF_8)));
 
             for (var handler : jWeb.getHandlers()) {
-                handler.onRequest(request);
+                handler.onRequest(request, response);
+            }
+
+            if (!response.isContentSet()) {
+                jWeb.getPageNotFound().onRequest(request, response);
             }
 
             if (request.isClosed()) {
                 return;
             }
-
-            FullHttpResponse response = null;
-            if (request.content() != null) {
-                response = new DefaultFullHttpResponse(req.protocolVersion(),
-                        request.status(),
-                        Unpooled.wrappedBuffer(request.content().getBytes(StandardCharsets.UTF_8)));
-            } else {
-                jWeb.getPageNotFound().onRequest(request);
-                response = new DefaultFullHttpResponse(req.protocolVersion(),
-                        request.status(),
-                        Unpooled.wrappedBuffer(request.content().getBytes(StandardCharsets.UTF_8)));
-            }
-
-            response.headers().set(request.responseHeaders());
 
             // ToDo add "Keep Alive" for any reason
             /*if (keepAlive) {
@@ -80,10 +67,10 @@ public class RawHttpHandler extends SimpleChannelInboundHandler<HttpObject> {
                     response.headers().set(CONNECTION, KEEP_ALIVE);
                 }
             } else {*/
-            response.headers().set(CONNECTION, CLOSE);
+            response.setHeader(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE.toString());
             // }
 
-            ChannelFuture future = ctx.write(response);
+            ChannelFuture future = ctx.write(response.getOriginalResponse());
             // if (!keepAlive) {
             future.addListener(ChannelFutureListener.CLOSE);
             // }
