@@ -86,7 +86,7 @@ public class HttpRequest {
     public void setRedirectUrl(String url) {
         this.status = HttpResponseStatus.PERMANENT_REDIRECT;
         this.content = "";
-        responseHeaders().set("Location", url);
+        this.responseHeaders().set("Location", url);
     }
 
     protected HttpResponseStatus status() {
@@ -98,7 +98,7 @@ public class HttpRequest {
     }
 
     public Set<Cookie> cookies() {
-        String cookieString = responseHeaders().get(HttpHeaderNames.COOKIE);
+        String cookieString = this.requestHeaders().get(HttpHeaderNames.COOKIE);
         if (cookieString == null) {
             return Set.of();
         }
