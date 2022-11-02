@@ -21,18 +21,19 @@ public class HttpRequest {
     private HttpResponseStatus status = HttpResponseStatus.NOT_FOUND;
     private String content = null;
     private boolean closed = false;
-    private HttpHeaders headers;
+    private HttpHeaders requestHeaders;
+    private HttpHeaders responseHeaders = new DefaultHttpHeaders();
 
-    protected HttpRequest(String path, ChannelHandlerContext ctx, HttpObject httpObject, boolean https, HashMap<String, String> vars, HttpHeaders headers) {
+    protected HttpRequest(String path, ChannelHandlerContext ctx, HttpObject httpObject, boolean https, HashMap<String, String> vars, HttpHeaders requestHeaders) {
         this.path = path;
         this.ctx = ctx;
         this.httpObject = httpObject;
         this.https = https;
         this.vars = vars;
-        this.headers = headers;
+        this.requestHeaders = requestHeaders;
     }
 
-    public String getPath() {
+    public String path() {
         return path;
     }
 
@@ -45,7 +46,7 @@ public class HttpRequest {
         return this.closed;
     }
 
-    public HttpObject getHttpObject() {
+    public HttpObject httpObject() {
         return httpObject;
     }
 
@@ -53,15 +54,19 @@ public class HttpRequest {
         return https;
     }
 
-    public HashMap<String, String> getVariables() {
+    public HashMap<String, String> variables() {
         return vars;
     }
 
-    public HttpHeaders getHeaders() {
-        return headers;
+    public HttpHeaders requestHeaders() {
+        return requestHeaders;
     }
 
-    public HttpMethod getMethod() {
+    public HttpHeaders responseHeaders() {
+        return responseHeaders;
+    }
+
+    public HttpMethod method() {
         return httpObject.decoderResult().isSuccess() ? ((io.netty.handler.codec.http.HttpRequest) httpObject).method() : null;
     }
 
@@ -69,7 +74,7 @@ public class HttpRequest {
         this.status = status;
         this.content = content;
         if (this.status == HttpResponseStatus.PERMANENT_REDIRECT || this.status == HttpResponseStatus.TEMPORARY_REDIRECT) {
-            this.headers.set("Location", this.content);
+            this.responseHeaders().set("Location", this.content);
         }
     }
 
@@ -81,19 +86,19 @@ public class HttpRequest {
     public void setRedirectUrl(String url) {
         this.status = HttpResponseStatus.PERMANENT_REDIRECT;
         this.content = "";
-        getHeaders().set("Location", url);
+        responseHeaders().set("Location", url);
     }
 
-    protected HttpResponseStatus getStatus() {
+    protected HttpResponseStatus status() {
         return status;
     }
 
-    protected String getContent() {
+    protected String content() {
         return content;
     }
 
-    public Set<Cookie> getCookies() {
-        String cookieString = headers.get(HttpHeaderNames.COOKIE);
+    public Set<Cookie> cookies() {
+        String cookieString = responseHeaders().get(HttpHeaderNames.COOKIE);
         if (cookieString == null) {
             return Set.of();
         }
@@ -101,7 +106,7 @@ public class HttpRequest {
     }
 
     public Cookie getCookie(String name) {
-        for (Cookie cookie : getCookies()) {
+        for (Cookie cookie : cookies()) {
             if (cookie.name().equals(name)) {
                 return cookie;
             }
@@ -109,16 +114,22 @@ public class HttpRequest {
         return null;
     }
 
-    public void setCookies(Cookie... cookie) {;
-        headers.set("Set-Cookie", ServerCookieEncoder.STRICT.encode(cookie));
+    public void setCookies(Cookie... cookies) {
+        ArrayList<String> cookieHeader = new ArrayList<>(responseHeaders().getAll("Set-Cookie"));
+        cookieHeader.addAll(ServerCookieEncoder.STRICT.encode(cookies));
+        responseHeaders().set("Set-Cookie", cookieHeader);
     }
 
     public void setCookies(Set<Cookie> cookies) {
-        headers.set("Set-Cookie", ServerCookieEncoder.STRICT.encode(cookies));
+        ArrayList<String> cookieHeader = new ArrayList<>(responseHeaders().getAll("Set-Cookie"));
+        cookieHeader.addAll(ServerCookieEncoder.STRICT.encode(cookies));
+        responseHeaders().set("Set-Cookie", cookieHeader);
     }
 
     public void setCookies(List<Cookie> cookies) {
-        headers.set("Set-Cookie", ServerCookieEncoder.STRICT.encode(cookies));
+        ArrayList<String> cookieHeader = new ArrayList<>(responseHeaders().getAll("Set-Cookie"));
+        cookieHeader.addAll(ServerCookieEncoder.STRICT.encode(cookies));
+        responseHeaders().set("Set-Cookie", cookieHeader);
     }
 
 }

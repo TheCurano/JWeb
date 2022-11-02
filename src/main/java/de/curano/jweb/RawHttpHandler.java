@@ -61,37 +61,35 @@ public class RawHttpHandler extends SimpleChannelInboundHandler<HttpObject> {
             }
 
             FullHttpResponse response = null;
-            if (request.getContent() != null) {
+            if (request.content() != null) {
                 response = new DefaultFullHttpResponse(req.protocolVersion(),
-                        request.getStatus(),
-                        Unpooled.wrappedBuffer(request.getContent().getBytes(StandardCharsets.UTF_8)));
+                        request.status(),
+                        Unpooled.wrappedBuffer(request.content().getBytes(StandardCharsets.UTF_8)));
             } else {
                 jWeb.getPageNotFound().onRequest(request);
                 response = new DefaultFullHttpResponse(req.protocolVersion(),
-                        request.getStatus(),
-                        Unpooled.wrappedBuffer(request.getContent().getBytes(StandardCharsets.UTF_8)));
+                        request.status(),
+                        Unpooled.wrappedBuffer(request.content().getBytes(StandardCharsets.UTF_8)));
             }
 
-            for (var header : request.getHeaders()) {
-                response.headers().set(header.getKey(), header.getValue());
-            }
+            response.headers().set(request.responseHeaders());
 
             // ToDo add "Keep Alive" for any reason
-
             /*if (keepAlive) {
                 if (!req.protocolVersion().isKeepAliveDefault()) {
                     response.headers().set(CONNECTION, KEEP_ALIVE);
                 }
             } else {*/
-                response.headers().set(CONNECTION, CLOSE);
+            response.headers().set(CONNECTION, CLOSE);
             // }
 
             ChannelFuture future = ctx.write(response);
             // if (!keepAlive) {
-                future.addListener(ChannelFutureListener.CLOSE);
+            future.addListener(ChannelFutureListener.CLOSE);
             // }
         }
     }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         for (var handler : jWeb.getHandlers()) {

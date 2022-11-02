@@ -32,7 +32,7 @@ public class TestApp {
             @Override
             public void onRequest(HttpRequest request) {
                 // Setting the Response
-                if (request.getPath().equals("/")) {
+                if (request.path().equals("/")) {
                     request.setResponse(HttpResponseStatus.ACCEPTED, "Hello World!");
                 }
             }

@@ -11,6 +11,3 @@ Cookies can be created by using the following code:
 ```java
 Cookie cookie = new DefaultCookie("test", "cool")
 ```
-### Header
-If you set an header, the old value will be overwritten.
-### If you have any questions, feel free to ask me on Discord: `Curano#4073`
